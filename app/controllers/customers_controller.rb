@@ -21,20 +21,21 @@ class CustomersController < ApplicationController
   def edit
   end
 
+  def already_registered(id)
+    found_customer = Customer.find_by_email(id)
+    found_customer ? true : false
+  end
+  
   # POST /customers
   # POST /customers.json
   def create
-    @customer = Customer.new(customer_params)
-
-    respond_to do |format|
-      if @customer.save
-        format.html { redirect_to @customer, notice: 'Customer was successfully created.' }
-        format.json { render :show, status: :created, location: @customer }
+      if  !already_registered(customer_params["email"])
+        @customer = Customer.new(customer_params)
+        @customer.save!
+        render json: @customer, status: :created
       else
-        format.html { render :new }
-        format.json { render json: @customer.errors, status: :unprocessable_entity }
+        render :json => { :errors => "customer is already registered" }
       end
-    end
   end
 
   # PATCH/PUT /customers/1
